@@ -4,10 +4,10 @@ EXPOSE 6003
 
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
-COPY ["user-service/UserService.csproj", "user-service/"]
-RUN dotnet restore "user-service/UserService.csproj"
+COPY ["UserService.csproj", "./"]
+RUN dotnet restore "UserService.csproj"
 COPY . .
-WORKDIR "/src/user-service"
+WORKDIR "/src"
 RUN dotnet build "UserService.csproj" -c Release -o /app/build
 
 FROM build AS publish
