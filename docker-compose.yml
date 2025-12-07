@@ -1,0 +1,45 @@
+version: '3.8'
+services:
+  redis:
+    image: redis:7
+    container_name: ms_redis
+    ports:
+      - "6379:6379"
+
+  product-service:
+    build: ./product-service
+    container_name: ms_product
+    ports:
+      - "6001:6001"
+    depends_on:
+      - redis
+
+  order-service:
+    build: ./order-service
+    container_name: ms_order
+    ports:
+      - "6002:6002"
+    depends_on:
+      - redis
+
+  user-service:
+    build: ./user-service
+    container_name: ms_user
+    ports:
+      - "6003:6003"
+    depends_on:
+      - redis
+
+  gateway:
+    build: ./gateway
+    container_name: ms_gateway
+    ports:
+      - "6000:6000"
+    depends_on:
+      - product-service
+      - order-service
+      - user-service
+      - redis
+    environment:
+      - Jwt__Key=VerySecretDemoKey12345
+      - Redis__Connection=redis:6379
