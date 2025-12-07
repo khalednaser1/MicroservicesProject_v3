@@ -1,45 +1,77 @@
 version: '3.8'
+
 services:
   redis:
-    image: redis:7
+    image: redis:7-alpine
     container_name: ms_redis
     ports:
       - "6379:6379"
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    volumes:
+      - redis_data:/data
 
   product-service:
-    build: ./product-service
+    build: 
+      context: .
+      dockerfile: product-service/Dockerfile
     container_name: ms_product
     ports:
       - "6001:6001"
     depends_on:
-      - redis
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
 
   order-service:
-    build: ./order-service
+    build: 
+      context: .
+      dockerfile: order-service/Dockerfile
     container_name: ms_order
     ports:
       - "6002:6002"
     depends_on:
-      - redis
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
 
   user-service:
-    build: ./user-service
+    build: 
+      context: .
+      dockerfile: user-service/Dockerfile
     container_name: ms_user
     ports:
       - "6003:6003"
     depends_on:
-      - redis
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
 
   gateway:
-    build: ./gateway
+    build: 
+      context: .
+      dockerfile: gateway/Dockerfile
     container_name: ms_gateway
     ports:
       - "6000:6000"
     depends_on:
-      - product-service
-      - order-service
-      - user-service
-      - redis
+      product-service:
+        condition: service_started
+      order-service:
+        condition: service_started
+      user-service:
+        condition: service_started
+      redis:
+        condition: service_healthy
     environment:
+      - ASPNETCORE_ENVIRONMENT=Development
       - Jwt__Key=VerySecretDemoKey12345
       - Redis__Connection=redis:6379
+    restart: unless-stopped
+
+volumes:
+  redis_data:
