@@ -1,4 +1,4 @@
-# MicroservicesProject_v2 (BFF / API Gateway) - Версия 2 (соответствует Заданию 5)
+# MicroservicesProject_v3 (BFF / API Gateway)
 
 Добавлено:
 - User Service + Product + Order
