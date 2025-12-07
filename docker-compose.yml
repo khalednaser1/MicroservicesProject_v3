@@ -3,75 +3,38 @@ version: '3.8'
 services:
   redis:
     image: redis:7-alpine
-    container_name: ms_redis
-    ports:
-      - "6379:6379"
-    command: redis-server --appendonly yes
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
-    volumes:
-      - redis_data:/data
+    ports: ["6379:6379"]
+    command: redis-server --requirepass "redis_pass_123"
 
   product-service:
-    build: 
-      context: .
-      dockerfile: product-service/Dockerfile
-    container_name: ms_product
-    ports:
-      - "6001:6001"
-    depends_on:
-      redis:
-        condition: service_healthy
-    restart: unless-stopped
+    build: ./product-service
+    ports: ["6001:6001"]
+    depends_on: [redis]
 
   order-service:
-    build: 
-      context: .
-      dockerfile: order-service/Dockerfile
-    container_name: ms_order
-    ports:
-      - "6002:6002"
-    depends_on:
-      redis:
-        condition: service_healthy
-    restart: unless-stopped
+    build: ./order-service  
+    ports: ["6002:6002"]
+    depends_on: [redis]
+    environment:
+      - Redis__Connection=redis:6379
+      - Redis__Password=redis_pass_123
 
   user-service:
-    build: 
-      context: .
-      dockerfile: user-service/Dockerfile
-    container_name: ms_user
-    ports:
-      - "6003:6003"
-    depends_on:
-      redis:
-        condition: service_healthy
-    restart: unless-stopped
+    build: ./user-service
+    ports: ["6003:6003"]
+    depends_on: [redis]
+    environment:
+      - Redis__Connection=redis:6379
+      - Redis__Password=redis_pass_123
 
   gateway:
-    build: 
-      context: .
-      dockerfile: gateway/Dockerfile
-    container_name: ms_gateway
-    ports:
-      - "6000:6000"
-    depends_on:
-      product-service:
-        condition: service_started
-      order-service:
-        condition: service_started
-      user-service:
-        condition: service_started
-      redis:
-        condition: service_healthy
+    build: ./gateway
+    ports: ["6000:6000"]
+    depends_on: [product-service, order-service, user-service, redis]
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
       - Jwt__Key=VerySecretDemoKey12345
       - Redis__Connection=redis:6379
-    restart: unless-stopped
-
-volumes:
-  redis_data:
+      - Redis__Password=redis_pass_123
+      - Services__UserService=http://user-service:6003
+      - Services__OrderService=http://order-service:6002
+      - Services__ProductService=http://product-service:6001
