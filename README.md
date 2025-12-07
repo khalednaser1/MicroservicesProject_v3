@@ -1,4 +1,4 @@
-# MicroservicesProject_v2 (BFF / API Gateway) - Version 2 (Задание 5 compliant)
+# MicroservicesProject_v3 (BFF / API Gateway)
 
 This version upgrades the demo to match the course assignment (Задание 5).
 Features added:
