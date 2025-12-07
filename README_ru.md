@@ -1,6 +1,6 @@
-# Microservices API Gateway 
+# Microservices API Gateway
 
-Описание проекта: Microservices API Gateway
+Описание проекта: 
 
 Разработан API Gateway (Backend for Frontend — BFF), который объединяет данные из нескольких микросервисов и предоставляет клиентам единое REST API. Сервис поддерживает агрегацию ответов, кэширование данных и маршрутизацию запросов.
 
