@@ -9,7 +9,7 @@ using Polly;
 using Polly.Extensions.Http;
 using Serilog;
 using Prometheus;
-using System.Threading.RateLimiting;
+using Microsoft.OpenApi.Models;
 
 Log.Logger = new LoggerConfiguration().WriteTo.Console().CreateLogger();
 
@@ -25,7 +25,6 @@ builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
     return ConnectionMultiplexer.Connect(config);
 });
 
-// Add health checks
 builder.Services.AddHealthChecks()
     .AddCheck("self", () => Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckResult.Healthy());
 
@@ -45,20 +44,48 @@ builder.Services.AddAuthentication("Bearer")
         };
     });
 
-builder.Services.AddRateLimiter(options =>
+builder.Services.AddAuthorization();
+
+// Swagger Configuration
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(c =>
 {
-    options.AddFixedWindowLimiter("fixed", opts =>
+    c.SwaggerDoc("v1", new() { Title = "Microservices Gateway API", Version = "v1" });
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
-        opts.PermitLimit = 20;
-        opts.Window = TimeSpan.FromSeconds(10);
-        opts.QueueLimit = 5;
+        Description = "JWT Authorization header using the Bearer scheme",
+        Name = "Authorization",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer"
+    });
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            new string[] {}
+        }
     });
 });
 
 var app = builder.Build();
 
+// Swagger UI
+app.UseSwagger();
+app.UseSwaggerUI(c =>
+{
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Microservices Gateway API v1");
+    c.RoutePrefix = "swagger";
+});
+
 app.UseSerilogRequestLogging();
-app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
 

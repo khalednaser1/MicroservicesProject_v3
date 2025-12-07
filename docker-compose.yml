@@ -29,7 +29,7 @@ services:
 
   gateway:
     build: ./gateway
-    ports: ["6000:6000"]
+    ports: ["8080:6000"]
     depends_on: [product-service, order-service, user-service, redis]
     environment:
       - Jwt__Key=VerySecretDemoKey12345
