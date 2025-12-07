@@ -5,9 +5,9 @@ EXPOSE 6001
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 COPY ["ProductService.csproj", "./"]
-RUN dotnet restore "product-service/ProductService.csproj"
+RUN dotnet restore "ProductService.csproj"
 COPY . .
-WORKDIR "/src/product-service"
+WORKDIR "/src"
 RUN dotnet build "ProductService.csproj" -c Release -o /app/build
 
 FROM build AS publish
