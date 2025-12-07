@@ -113,7 +113,7 @@ app.MapGet("/api/profile/{userId:int}", async (int userId, IHttpClientFactory ht
         var prodResp = await retry.ExecuteAsync(() => client.GetAsync($"http://product-service:6001/api/products/{pid}"));
         var prodJson = prodResp.IsSuccessStatusCode
             ? await prodResp.Content.ReadAsStringAsync()
-            : "{"id":0,"name":"unknown"}";
+            : "{\"id\":0,\"name\":\"unknown\"}";
         aggOrders.Add(new {
             order = JsonSerializer.Deserialize<object>(o.GetRawText()),
             product = JsonSerializer.Deserialize<object>(prodJson)
