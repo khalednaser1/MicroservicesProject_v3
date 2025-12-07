@@ -1,6 +1,6 @@
 # MicroservicesProject_v3 (BFF / API Gateway)
 
-This version upgrades the demo to match the course assignment (Задание 5).
+This version upgrades the demo to match the course assignment.
 Features added:
 - User Service + Product + Order services
 - Gateway implements aggregation endpoint: GET /api/profile/{userId}
