@@ -4,10 +4,10 @@ EXPOSE 6000
 
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
-COPY ["gateway/Gateway.csproj", "gateway/"]
-RUN dotnet restore "gateway/Gateway.csproj"
+COPY ["Gateway.csproj", "./"]
+RUN dotnet restore "Gateway.csproj"
 COPY . .
-WORKDIR "/src/gateway"
+WORKDIR "/src"
 RUN dotnet build "Gateway.csproj" -c Release -o /app/build
 
 FROM build AS publish
